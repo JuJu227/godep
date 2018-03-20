@@ -8,6 +8,7 @@ import (
 	"go/token"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -211,13 +212,23 @@ func findDirForPath(path string, ip *build.Package) (string, error) {
 		search = append(search, filepath.Join(base, path))
 	}
 
-	for _, dir := range search {
+	for index, dir := range search {
 		debugln("searching", dir)
 		fi, err := stat(dir)
 		if err == nil && fi.IsDir() {
 			return dir, nil
+		} else { 
+          	   if index == (len(search) -1) { 
+		       fmt.Println("We Would like to install this package to your GOPATH? Y/N") 
+		       var opinion rune  
+		       if _, err := fmt.Scanf("%c",&opinion) ; err == nil { 
+		         exec.Command("go", "get", path).Run()
+		         return dir, nil 
+		     }
+	           }
 		}
 	}
+            
 
 	return "", errPackageNotFound{path}
 }
